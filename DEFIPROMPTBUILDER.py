@@ -1,211 +1,213 @@
 import streamlit as st
 
-# -----------------------------
-# PAGE CONFIG
-# -----------------------------
-st.set_page_config(page_title="DeFi Prompt Builder", layout="wide")
+st.set_page_config(page_title="DeFi Vault Prompt Builder", layout="wide")
 
-st.title("DeFi AI Agent Prompt Builder")
+st.title("DeFi Auto-Farm Prompt Generator")
 
-# -----------------------------
-# SIDEBAR - MODES
-# -----------------------------
-st.sidebar.header("Strategy Mode")
+st.markdown("Configure ton agent IA et génère automatiquement un prompt optimisé.")
 
-mode = st.sidebar.selectbox(
-    "Select Mode",
-    ["CUSTOM", "SAFE", "BALANCED", "AGGRESSIVE", "SNIPER"]
-)
-
-# Presets
-def load_mode(mode):
-    if mode == "SAFE":
-        return {
-            "apr_24h": 800,
-            "apr_7d": 300,
-            "tvl": 50000,
-            "strategies": 2,
-            "max_alloc": 50,
-            "slippage": 1,
-            "gas": 2,
-        }
-    elif mode == "BALANCED":
-        return {
-            "apr_24h": 1200,
-            "apr_7d": 600,
-            "tvl": 25000,
-            "strategies": 2,
-            "max_alloc": 70,
-            "slippage": 2,
-            "gas": 2,
-        }
-    elif mode == "AGGRESSIVE":
-        return {
-            "apr_24h": 1500,
-            "apr_7d": 500,
-            "tvl": 15000,
-            "strategies": 2,
-            "max_alloc": 90,
-            "slippage": 2,
-            "gas": 2,
-        }
-    elif mode == "SNIPER":
-        return {
-            "apr_24h": 2500,
-            "apr_7d": 1000,
-            "tvl": 10000,
-            "strategies": 1,
-            "max_alloc": 100,
-            "slippage": 3,
-            "gas": 3,
-        }
-    else:
-        return None
-
-preset = load_mode(mode)
-
-# -----------------------------
+# =========================
 # INPUTS
-# -----------------------------
-st.header("Strategy Parameters")
+# =========================
 
-col1, col2, col3 = st.columns(3)
+st.sidebar.header("Core Parameters")
 
-with col1:
-    apr_24h = st.slider(
-        "Min APR 24h (%)", 500, 5000,
-        preset["apr_24h"] if preset else 1500
-    )
-    apr_7d = st.slider(
-        "Min APR 7d (%)", 100, 3000,
-        preset["apr_7d"] if preset else 500
-    )
-    tvl = st.number_input(
-        "Min Pool TVL ($)",
-        value=preset["tvl"] if preset else 15000
-    )
+BASE_CURRENCY = st.sidebar.text_input("Base Currency", "USDT")
 
-with col2:
-    strategies = st.selectbox(
-        "Max Strategies",
-        [1, 2, 3],
-        index=[1,2,2][strategies-1] if preset else 1
-    )
-    max_alloc = st.slider(
-        "Max Capital per Pool (%)",
-        50, 100,
-        preset["max_alloc"] if preset else 100
-    )
-    min_position = st.slider("Min Position Value ($)", 10, 50, 20)
+MIN_APR_24H = st.sidebar.number_input("Min APR 24h (%)", value=1500)
+MIN_APR_7D = st.sidebar.number_input("Min APR 7d (%)", value=500)
 
-with col3:
-    slippage = st.slider(
-        "Slippage (%)",
-        1, 5,
-        preset["slippage"] if preset else 2
-    )
-    gas = st.slider(
-        "Max Gas ($)",
-        1, 5,
-        preset["gas"] if preset else 2
-    )
-    harvest_min = st.slider("Min Harvest ($)", 1, 10, 2)
+MIN_POOL_TVL = st.sidebar.number_input("Min Pool TVL ($)", value=15000)
+MIN_VOLUME_24H = st.sidebar.number_input("Min Volume 24h ($)", value=50000)
 
-# Advanced
-st.header("Advanced Options")
+MAX_VOLATILITY = st.sidebar.number_input("Max Volatility (%)", value=75)
 
-col4, col5 = st.columns(2)
+MAX_CAPITAL_PER_POOL = st.sidebar.slider("Max Capital per Pool (%)", 10, 100, 70)
 
-with col4:
-    dominance = st.checkbox("Enable Dominance Logic", True)
-    dust = st.checkbox("Enable Dust Cleanup", True)
+MIN_POSITION_VALUE = st.sidebar.number_input("Min Position Value ($)", value=15)
 
-with col5:
-    auto_realloc = st.checkbox("Auto Reallocation", True)
-    strict_execution = st.checkbox("Strict Cost Control", True)
+HARVEST_PERC = st.sidebar.slider("Harvest Trigger (%)", 1, 20, 5)
 
-# -----------------------------
-# BUILD CONFIG
-# -----------------------------
-def build_config():
-    return {
-        "POOL_MIN_APR_24H": apr_24h,
-        "POOL_MIN_APR_7D": apr_7d,
-        "POOL_MIN_TVL": tvl,
-        "CAPITAL_MAX_PER_POOL_PERC": max_alloc,
-        "CAPITAL_TARGET_STRATEGIES": strategies,
-        "CAPITAL_MIN_POSITION_VALUE": min_position,
-        "SLIPPAGE_SWAP_MAX": slippage,
-        "GAS_MAX_USD": gas,
-        "HARVEST_MIN_USD": harvest_min,
-    }
+STOP_LOSS = st.sidebar.slider("Stop Loss (%)", -50, 0, -10)
+TAKE_PROFIT = st.sidebar.slider("Take Profit (%)", 5, 100, 25)
 
-# -----------------------------
+# =========================
 # PROMPT TEMPLATE
-# -----------------------------
-def generate_prompt(config):
-    dominance_block = ""
-    if dominance:
-        dominance_block = f"""
-DOMINANCE_ENABLE = true
-DOMINANCE_MIN_APR_RATIO = 1.2
-DOMINANCE_MIN_ROI_RATIO = 2
-DOMINANCE_FORCE_REALLOCATION = {str(auto_realloc).lower()}
+# =========================
+
+prompt = f"""
+# AUTO-FARM INSTRUCTIONS
+## HYBRID AGGRESSIVE — DUAL APR DRIVEN + DUST ARBITRAGE + CAPITAL CONCENTRATION
+
+---
+
+## CONFIGURATION
+
+### VAULT VARIABLES
+BASE_CURRENCY = {BASE_CURRENCY}
+
+MIN_TOTAL_TVL_FOR_DIVERSIFICATION = 150
+MAX_ACTIVE_STRATEGIES_SMALL_TVL = 2
+MAX_ACTIVE_STRATEGIES_MEDIUM_TVL = 3
+
+---
+
+### POOL FILTERS
+
+MIN_APR_24H = {MIN_APR_24H}%
+MIN_APR_7D = {MIN_APR_7D}%
+
+MIN_POOL_TVL = ${MIN_POOL_TVL}
+MIN_VOLUME_24H = ${MIN_VOLUME_24H}
+
+MAX_VOLATILITY = {MAX_VOLATILITY}%
+
+MIN_VOLUME_TVL_RATIO = 2
+
+---
+
+### CAPITAL MANAGEMENT
+
+MAX_CAPITAL_PER_POOL = {MAX_CAPITAL_PER_POOL}%
+
+DOMINANCE_THRESHOLD = 1.5
+DOMINANCE_ALLOCATION = 0.65
+
+MIN_POSITION_VALUE = ${MIN_POSITION_VALUE}
+
+---
+
+### ENTRY LOGIC
+
+ENTRY_ENABLED = TRUE
+
+IF POOL:
+- APR_24H >= MIN_APR_24H
+- APR_7D >= MIN_APR_7D
+- TVL >= MIN_POOL_TVL
+- VOLUME >= MIN_VOLUME_24H
+- VOLATILITY <= MAX_VOLATILITY
+
+THEN:
+- CREATE POSITION
+
+ALLOCATION:
+- FIRST POSITION = 60–70% CAPITAL
+- SECOND POSITION = REMAINING CAPITAL
+
+---
+
+### RANGE MANAGEMENT
+
+RANGE_VOL_MULT = 0.5
+MIN_RANGE_WIDTH = 5%
+
+RANGE_WIDTH = MAX(MIN_RANGE_WIDTH, VOLATILITY * RANGE_VOL_MULT)
+
+---
+
+### HARVEST LOGIC
+
+HARVEST_TRIGGER = {HARVEST_PERC}%
+
+HARVEST IF:
+- FEES >= HARVEST_TRIGGER
+OR
+- TVL < 100 AND FEES >= $1
+
+---
+
+### EXIT LOGIC
+
+STOP_LOSS = {STOP_LOSS}%
+TAKE_PROFIT = {TAKE_PROFIT}%
+
+EXIT IF:
+- ROI < STOP_LOSS
+- ROI >= TAKE_PROFIT
+- APR DROP BELOW THRESHOLD
+- POSITION < MIN_POSITION_VALUE
+
+---
+
+### CAPITAL CONCENTRATION
+
+IF:
+APR_TOP > 1.5x APR_SECOND
+
+THEN:
+- ALLOCATE >= 60% TO TOP POOL
+
+---
+
+### DUST MANAGEMENT
+
+IF TVL < $100:
+- CONVERT ALL DUST TO BASE
+- OR REINJECT INTO BEST POSITION
+
+---
+
+### EXECUTION FILTER
+
+DO NOT EXECUTE IF:
+COST > 10% EXPECTED GAIN
+
+IF TVL < $100:
+ALLOW UP TO 20%
+
+---
+
+### TOKEN SAFETY
+
+REJECT IF:
+- TAX > 2%
+- SELL RESTRICTIONS
+- LOW LIQUIDITY CONTROL
+- TOKEN TOO NEW
+
+---
+
+### STRATEGY PRIORITY ORDER
+
+1. EXIT
+2. OUT_RANGE
+3. HARVEST
+4. INCREASE_LIQUIDITY
+5. ENTRY
+
+---
+
+### OBJECTIVE
+
+MAXIMIZE:
+- REAL YIELD (FEES)
+- CAPITAL EFFICIENCY
+- POSITION SIZE
+
+MINIMIZE:
+- GAS COSTS
+- OVER-DIVERSIFICATION
+- LOW VALUE ACTIONS
+
+---
+
+### MODE
+
+HIGH_RISK + HIGH_CONCENTRATION + LOW_TVL_OPTIMIZED
 """
 
-    dust_block = ""
-    if dust:
-        dust_block = """
-DUST_ENABLE = true
-DUST_MIN_USD = 3
-"""
+# =========================
+# OUTPUT
+# =========================
 
-    execution_block = f"""
-EXECUTION_MAX_COST_RATIO = {25 if strict_execution else 40}%
-EXECUTION_MIN_ACTION_VALUE = 5
-"""
+st.subheader("Generated Prompt")
 
-    prompt = f"""
-# AUTO GENERATED DEFI PROMPT
+st.code(prompt, language="markdown")
 
-## POOL SELECTION
-POOL_MIN_APR_24H = {config['POOL_MIN_APR_24H']}%
-POOL_MIN_APR_7D = {config['POOL_MIN_APR_7D']}%
-POOL_MIN_TVL = {config['POOL_MIN_TVL']}
-
-## CAPITAL MANAGEMENT
-CAPITAL_MAX_PER_POOL_PERC = {config['CAPITAL_MAX_PER_POOL_PERC']}%
-CAPITAL_TARGET_STRATEGIES = {config['CAPITAL_TARGET_STRATEGIES']}
-CAPITAL_MIN_POSITION_VALUE = {config['CAPITAL_MIN_POSITION_VALUE']}
-
-## EXECUTION
-SLIPPAGE_SWAP_MAX = {config['SLIPPAGE_SWAP_MAX']}%
-GAS_MAX_USD = {config['GAS_MAX_USD']}
-
-## HARVEST
-HARVEST_MIN_USD = {config['HARVEST_MIN_USD']}
-
-{dominance_block}
-
-{dust_block}
-
-{execution_block}
-"""
-    return prompt
-
-# -----------------------------
-# GENERATE BUTTON
-# -----------------------------
-if st.button("Generate Prompt"):
-    config = build_config()
-    prompt = generate_prompt(config)
-
-    st.subheader("Generated Prompt")
-    st.code(prompt, language="text")
-
-    st.download_button(
-        label="Download Prompt",
-        data=prompt,
-        file_name="defi_prompt.txt",
-        mime="text/plain"
-    )
+st.download_button(
+    label="Download Prompt",
+    data=prompt,
+    file_name="defi_prompt.txt",
+    mime="text/plain"
+)

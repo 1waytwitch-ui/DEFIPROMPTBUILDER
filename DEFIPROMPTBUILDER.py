@@ -62,13 +62,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("DeFi VAULT Auto-Farm Prompt Generator (Auto Mode)")
-st.markdown("Génération automatique avec adaptation dynamique selon la TVL.")
+st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
+st.markdown("AUTO ADJUST WITH TVL")
 
 # =========================
 # INPUTS
 # =========================
-st.sidebar.header("DEGEN Vault Settings")
+st.sidebar.header("DEGEN VAULT SETTINGS")
 
 TVL = st.sidebar.number_input("Vault TVL ($)", value=60.0)
 BASE_CURRENCY = st.sidebar.text_input("Base Currency", "USDT")

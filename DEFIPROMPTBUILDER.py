@@ -266,9 +266,4 @@ MINIMIZE:
 st.subheader(f"Detected Mode: {MODE}")
 st.code(prompt, language="markdown")
 
-st.download_button(
-    "Download Prompt",
-    data=prompt,
-    file_name="defi_prompt_auto_mode.txt",
-    mime="text/plain"
 )

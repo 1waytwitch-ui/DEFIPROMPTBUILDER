@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(page_title="DeFi Vault Prompt Builder", layout="wide")
 
 # =========================
-# THEME TERMINAL GREEN
+# THEME
 # =========================
 st.markdown(
     """
@@ -62,13 +62,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("DeFi Auto-Farm Prompt Generator (Auto Mode)")
-st.markdown("Génération automatique avec adaptation dynamique selon le TVL.")
+st.title("DeFi VAULT Auto-Farm Prompt Generator (Auto Mode)")
+st.markdown("Génération automatique avec adaptation dynamique selon la TVL.")
 
 # =========================
 # INPUTS
 # =========================
-st.sidebar.header("Vault State")
+st.sidebar.header("DEGEN Vault Settings")
 
 TVL = st.sidebar.number_input("Vault TVL ($)", value=60.0)
 BASE_CURRENCY = st.sidebar.text_input("Base Currency", "USDT")

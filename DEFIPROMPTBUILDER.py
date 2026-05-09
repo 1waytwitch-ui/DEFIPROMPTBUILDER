@@ -266,4 +266,3 @@ MINIMIZE:
 st.subheader(f"Detected Mode: {MODE}")
 st.code(prompt, language="markdown")
 
-)

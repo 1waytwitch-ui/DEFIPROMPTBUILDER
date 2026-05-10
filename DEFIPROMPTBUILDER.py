@@ -72,6 +72,18 @@ st.markdown(
         background-color: #050805;
     }
 
+    .warning-box {
+        border: 1px solid #ffcc00;
+        background-color: rgba(255, 204, 0, 0.08);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        margin-bottom: 20px;
+        font-family: monospace;
+        color: #ffcc00;
+        box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+    }
+
     </style>
     """,
     unsafe_allow_html=True
@@ -80,7 +92,7 @@ st.markdown(
 st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
 
 # -----------------------
-# CODE SECRET - THEME TERMINAL AVEC BOUTON VALIDER + TYPING
+# CODE SECRET - TERMINAL
 # -----------------------
 SECRET_CODE = st.secrets["Secret_Code"]
 
@@ -189,6 +201,7 @@ if not st.session_state.authenticated:
         else:
             add_line("> [!] CODE INCORRECT", glitch=True)
             st.error("Code incorrect")
+
     st.stop()
 
 # ======= UNLOCK MESSAGE ======
@@ -206,6 +219,7 @@ st.markdown("AUTO ADJUST WITH TVL")
 st.markdown("### DEGEN VAULT SETTINGS")
 
 with st.container():
+
     st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
@@ -229,6 +243,31 @@ with st.container():
         HARVEST_PERC = st.slider("Harvest Trigger (%)", 1, 20, 5)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+# =========================
+# DISCLAIMER
+# =========================
+st.markdown("""
+<div class='warning-box'>
+<b>⚠ DISCLAIMER :</b><br><br>
+
+Ce générateur de stratégie DeFi est fourni uniquement à titre éducatif et expérimental.<br><br>
+
+Il ne constitue en aucun cas un conseil en investissement, une recommandation financière ou une garantie de rendement.<br><br>
+
+Les stratégies DeFi "degen" comportent des risques extrêmement élevés :
+<ul>
+<li>Perte totale du capital</li>
+<li>Hack de protocole</li>
+<li>Rug pull</li>
+<li>Impermanent loss</li>
+<li>Volatilité extrême</li>
+<li>Erreurs de smart contracts</li>
+</ul>
+
+N'investissez que du capital que vous êtes prêt à perdre intégralement et utilisez toujours une répartition réfléchie de votre portefeuille.
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
 # AUTO MODE SWITCH

@@ -221,17 +221,19 @@ if not st.session_state.authenticated:
 # =========================
 st.markdown("""
 <div style='font-family:monospace; font-size:13px; margin-top:10px;'>
-    <span style='color:#00ff88;'>
-        > ACCÈS AUTORISÉ — Bonjour et bienvenue !
-    </span>
 
-    <br><br>
+<span style='color:#00ff88;'>
+> ACCÈS AUTORISÉ — Bonjour et bienvenue !
+</span>
 
-    <span style='color:#ff4d4d; font-weight:bold;'>
-        ⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
-        Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
-        Utilisez uniquement un capital à risque avec une répartition réfléchie.
-    </span>
+<br><br>
+
+<span style='color:#ff4d4d; font-weight:bold;'>
+⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
+Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
+Utilisez uniquement un capital à risque avec une répartition réfléchie.
+</span>
+
 </div>
 """, unsafe_allow_html=True)
 

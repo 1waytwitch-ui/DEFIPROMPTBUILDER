@@ -56,6 +56,7 @@ st.markdown(
         color: #00ff66;
         border: 1px solid #00ff66;
         box-shadow: 0px 0px 10px #00ff66;
+        font-size: 12px;
     }
 
     div.stButton > button:hover {
@@ -75,13 +76,22 @@ st.markdown(
     .warning-box {
         border: 1px solid #ffcc00;
         background-color: rgba(255, 204, 0, 0.08);
-        padding: 15px;
+        padding: 10px;
         border-radius: 8px;
-        margin-top: 15px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 15px;
         font-family: monospace;
         color: #ffcc00;
+        font-size: 12px;
         box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+    }
+
+    .keyword-box {
+        border: 1px solid #00ff66;
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 6px;
+        background-color: #050805;
     }
 
     </style>
@@ -92,7 +102,7 @@ st.markdown(
 st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
 
 # -----------------------
-# CODE SECRET - TERMINAL
+# CODE SECRET
 # -----------------------
 SECRET_CODE = st.secrets["Secret_Code"]
 
@@ -104,7 +114,9 @@ if "secret_content" not in st.session_state:
 
 terminal_placeholder = st.empty()
 
-# ======= RENDER ======
+# =========================
+# TERMINAL
+# =========================
 def render():
     terminal_placeholder.markdown(
         """
@@ -120,7 +132,6 @@ def render():
         unsafe_allow_html=True
     )
 
-# ======= STYLE TERMINAL ======
 st.markdown("""
 <style>
 .checklist-terminal {
@@ -148,16 +159,9 @@ st.markdown("""
     50% { opacity: 0; }
     100% { opacity: 1; }
 }
-.stButton>button {
-    background-color: black;
-    color: #00ff88;
-    border: 1px solid #00ff88;
-    font-family: monospace;
-}
 </style>
 """, unsafe_allow_html=True)
 
-# ======= TYPING / GLITCH ======
 def type_line(line):
     st.session_state.secret_content.append("")
     current = ""
@@ -165,7 +169,7 @@ def type_line(line):
         current += char
         st.session_state.secret_content[-1] = current
         render()
-        time.sleep(random.uniform(0.01, 0.01))
+        time.sleep(0.01)
 
 def subtle_glitch(line, chance=0.15):
     if not st.session_state.secret_content:
@@ -182,15 +186,16 @@ def add_line(line, glitch=False):
     type_line(line)
     if glitch:
         subtle_glitch(line)
-    time.sleep(random.uniform(0.01, 0.1))
 
-# ======= TERMINAL AUTHENTICATION ======
+# =========================
+# AUTH
+# =========================
 if not st.session_state.authenticated:
 
     if not st.session_state.secret_content:
         add_line("$ ACCESS PROTOCOL INITIALIZATION", glitch=True)
-        add_line("> Vérification des droits de la Team Élite KBOUR Crypto...")
-        add_line("> Veuillez saisir le code d'accès ci-dessous")
+        add_line("> Vérification Team Élite KBOUR Crypto...")
+        add_line("> Veuillez saisir le code d'accès")
 
     code_input = st.text_input("Code d'accès", key="secret_code", type="password")
 
@@ -204,7 +209,9 @@ if not st.session_state.authenticated:
 
     st.stop()
 
-# ======= UNLOCK MESSAGE ======
+# =========================
+# HEADER
+# =========================
 st.markdown("""
 <div style='color:#00ff88; font-family:monospace; font-size:13px; margin-top:10px;'>
 > ACCÈS AUTORISÉ — Bonjour et bienvenue !
@@ -214,7 +221,7 @@ st.markdown("""
 st.markdown("AUTO ADJUST WITH TVL")
 
 # =========================
-# INPUTS COMPACTS EN HAUT
+# INPUTS
 # =========================
 st.markdown("### DEGEN VAULT SETTINGS")
 
@@ -249,28 +256,14 @@ with st.container():
 # =========================
 st.markdown("""
 <div class='warning-box'>
-<b>⚠ DISCLAIMER :</b><br><br>
-
-Ce générateur de stratégie DeFi est fourni uniquement à titre éducatif et expérimental.<br><br>
-
-Il ne constitue en aucun cas un conseil en investissement, une recommandation financière ou une garantie de rendement.<br><br>
-
-Les stratégies DeFi "degen" comportent des risques extrêmement élevés :
-<ul>
-<li>Perte totale du capital</li>
-<li>Hack de protocole</li>
-<li>Rug pull</li>
-<li>Impermanent loss</li>
-<li>Volatilité extrême</li>
-<li>Erreurs de smart contracts</li>
-</ul>
-
-N'investissez que du capital que vous êtes prêt à perdre intégralement et utilisez toujours une répartition réfléchie de votre portefeuille.
+⚠ <b>DISCLAIMER</b> — Outil éducatif uniquement. Aucun conseil en investissement.<br>
+Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
+Utilisez uniquement un capital à risque avec une répartition réfléchie.
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
-# AUTO MODE SWITCH
+# AUTO MODE
 # =========================
 if TVL < 100:
     MODE = "SURVIVAL"
@@ -305,7 +298,7 @@ else:
     dominance = 0.55
 
 # =========================
-# PROMPT TEMPLATE
+# PROMPT
 # =========================
 prompt = f"""
 # AUTO-FARM INSTRUCTIONS
@@ -318,14 +311,6 @@ prompt = f"""
 TVL = ${TVL}
 BASE_CURRENCY = {BASE_CURRENCY}
 MODE = {MODE}
-
----
-
-## AUTO MODE SWITCH LOGIC
-IF TVL < 100: MODE = SURVIVAL
-ELIF TVL < 500: MODE = SCALING
-ELIF TVL < 2000: MODE = OPTIMIZATION
-ELSE: MODE = AGGRESSIVE
 
 ---
 
@@ -344,44 +329,6 @@ MIN_APR_7D = {MIN_APR_7D}%
 MIN_POOL_TVL = ${MIN_POOL_TVL}
 MIN_VOLUME_24H = ${MIN_VOLUME_24H}
 MAX_VOLATILITY = {MAX_VOLATILITY}%
-MIN_VOLUME_TVL_RATIO = 2
-
----
-
-## ENTRY LOGIC
-ONLY ENTER IF:
-- APR_24H >= MIN_APR_24H
-- APR_7D >= MIN_APR_7D
-- TVL >= MIN_POOL_TVL
-- VOLUME >= MIN_VOLUME_24H
-
-ALLOCATION RULES:
-IF FIRST POSITION: ALLOCATE {int(dominance*100)}%
-IF SECOND POSITION: ALLOCATE REMAINING
-
----
-
-## CAPITAL CONCENTRATION
-IF: APR_TOP > 1.5x APR_SECOND THEN:
-ALLOCATE >= {int(dominance*100)}% TO TOP POOL
-
----
-
-## RANGE MANAGEMENT
-RANGE_VOL_MULT = 0.5
-MIN_RANGE_WIDTH = 5%
-RANGE_WIDTH = MAX(MIN_RANGE_WIDTH, VOLATILITY * RANGE_VOL_MULT)
-
----
-
-## HARVEST LOGIC
-HARVEST IF:
-- FEES >= {HARVEST_PERC}% OR
-- FEES >= ${min_action}
-
-IF MODE = SURVIVAL:
-- DELAY HARVEST
-- FAVOR COMPOUND
 
 ---
 
@@ -389,70 +336,171 @@ IF MODE = SURVIVAL:
 STOP_LOSS = {STOP_LOSS}%
 TAKE_PROFIT = {TAKE_PROFIT}%
 
-EXIT IF:
-- ROI < STOP_LOSS
-- ROI >= TAKE_PROFIT
-- POSITION VALUE TOO SMALL
-- APR COLLAPSE
-
 ---
 
-## DUST MANAGEMENT
-IF MODE = SURVIVAL:
-- MERGE ALL DUST INTO MAIN POSITION
-- AVOID SWAPS
-ELSE:
-- CLEAN DUST NORMALLY
-
----
-
-## EXECUTION FILTER
-DO NOT EXECUTE IF:
-COST > {execution_cost}% EXPECTED GAIN
-IGNORE ACTIONS < ${min_action}
-
----
-
-## BEHAVIORAL RULES
-IF MODE = SURVIVAL:
-- PRIORITIZE POSITION SIZE
-- MINIMIZE ACTIONS
-- AVOID OVER-DIVERSIFICATION
-
-IF MODE = SCALING:
-- BALANCE GROWTH AND COST
-
-IF MODE = OPTIMIZATION:
-- OPTIMIZE YIELD VS COST
-
-IF MODE = AGGRESSIVE:
-- MAXIMIZE YIELD
-- ALLOW ROTATION
-
----
-
-## PRIORITY
-1. EXIT
-2. OUT_RANGE
-3. HARVEST
-4. INCREASE
-5. ENTRY
-
----
-
-## OBJECTIVE
-MAXIMIZE:
-- FEES
-- CAPITAL EFFICIENCY
-
-MINIMIZE:
-- GAS
-- SLIPPAGE
-- USELESS ACTIONS
+## HARVEST
+HARVEST_TRIGGER = {HARVEST_PERC}%
 """
 
-# =========================
-# OUTPUT
-# =========================
 st.subheader(f"Detected Mode: {MODE}")
 st.code(prompt, language="markdown")
+
+# =========================
+# KEYWORDS DATABASE
+# =========================
+keywords = {
+    "1. STRUCTURE GLOBALE": [
+        "CATEGORY_KEY_NAME ="
+    ],
+
+    "2. POOL SELECTION": [
+        "POOL_MIN_APR_24H =",
+        "POOL_MIN_APR_7D =",
+        "POOL_MAX_APR_SPIKE_RATIO =",
+        "POOL_MIN_TVL =",
+        "POOL_MIN_VOLUME_24H =",
+        "POOL_MIN_VOLUME_TVL_RATIO =",
+        "POOL_MAX_VOLATILITY =",
+        "POOL_MAX_DRAWDOWN_24H =",
+        "POOL_MIN_FEES_24H =",
+        "POOL_REQUIRE_RELIABLE_APR =",
+        "POOL_REQUIRE_FEE_BASED_APR =",
+        "POOL_DATA_MAX_AGE_MINUTES ="
+    ],
+
+    "3. CAPITAL MANAGEMENT": [
+        "CAPITAL_BASE_CURRENCY =",
+        "CAPITAL_MIN_TVL_FOR_DIVERSIFICATION =",
+        "CAPITAL_TARGET_STRATEGIES_SMALL =",
+        "CAPITAL_TARGET_STRATEGIES_MEDIUM =",
+        "CAPITAL_TARGET_STRATEGIES_LARGE =",
+        "CAPITAL_MAX_PER_POOL_PERC =",
+        "CAPITAL_MAX_PER_TOKEN_PERC_SMALL =",
+        "CAPITAL_MAX_PER_TOKEN_PERC_NORMAL =",
+        "CAPITAL_MIN_POSITION_VALUE =",
+        "CAPITAL_MIN_ACTION_VALUE ="
+    ],
+
+    "4. DOMINANCE & REALLOCATION": [
+        "DOMINANCE_ENABLE =",
+        "DOMINANCE_MIN_APR_RATIO =",
+        "DOMINANCE_MIN_ROI_RATIO =",
+        "DOMINANCE_FORCE_REALLOCATION =",
+        "DOMINANCE_MIN_WINNER_ALLOCATION ="
+    ],
+
+    "5. ENTRY": [
+        "ENTRY_ENABLE =",
+        "ENTRY_MIN_APR_24H =",
+        "ENTRY_MIN_APR_7D =",
+        "ENTRY_MAX_ACTIVE_STRATEGIES =",
+        "ENTRY_CAPITAL_FIRST_POSITION =",
+        "ENTRY_CAPITAL_SECOND_POSITION =",
+        "ENTRY_MIN_SIZE_USD =",
+        "ENTRY_PRICE_IMPACT_MAX ="
+    ],
+
+    "6. INCREASE LIQUIDITY": [
+        "INCREASE_ENABLE =",
+        "INCREASE_ONLY_IF_NO_BETTER_POOL =",
+        "INCREASE_REQUIRE_POSITIVE_ROI =",
+        "INCREASE_ONLY_ON_DOMINANT =",
+        "INCREASE_MIN_AMOUNT_USD ="
+    ],
+
+    "7. EXIT": [
+        "EXIT_ENABLE =",
+        "EXIT_STOP_LOSS =",
+        "EXIT_TAKE_PROFIT =",
+        "EXIT_MIN_POSITION_VALUE =",
+        "EXIT_ON_APR_DROP =",
+        "EXIT_MIN_APR_24H =",
+        "EXIT_MIN_APR_7D =",
+        "EXIT_ON_BETTER_POOL =",
+        "EXIT_BETTER_POOL_APR_RATIO =",
+        "EXIT_BETTER_POOL_TVL_RATIO ="
+    ],
+
+    "8. RANGE MANAGEMENT": [
+        "RANGE_MIN_WIDTH =",
+        "RANGE_VOL_MULTIPLIER =",
+        "RANGE_ADJUST_ON_OUT =",
+        "RANGE_MAX_ADJUST_PER_2H =",
+        "RANGE_INCREASE_IF_TRENDING =",
+        "RANGE_REDUCE_SIZE_IF_TRENDING ="
+    ],
+
+    "9. HARVEST": [
+        "HARVEST_ENABLE =",
+        "HARVEST_MIN_PERC =",
+        "HARVEST_MIN_USD =",
+        "HARVEST_REQUIRE_PROFITABLE =",
+        "HARVEST_SKIP_IF_TOO_SMALL ="
+    ],
+
+    "10. DUST MANAGEMENT": [
+        "DUST_ENABLE =",
+        "DUST_MIN_USD =",
+        "DUST_CONVERT_TO_BASE =",
+        "DUST_IGNORE_IF_TVL_SMALL ="
+    ],
+
+    "11. EXECUTION / GAS / SLIPPAGE": [
+        "EXECUTION_MAX_COST_RATIO =",
+        "EXECUTION_MAX_COST_RATIO_SMALL_TVL =",
+        "EXECUTION_MIN_ACTION_VALUE =",
+        "SLIPPAGE_SWAP_MAX =",
+        "SLIPPAGE_LIQUIDITY_MAX =",
+        "SLIPPAGE_WITHDRAW_MAX =",
+        "GAS_MAX_USD =",
+        "COOLDOWN_MINUTES ="
+    ],
+
+    "12. RISK CONTROL": [
+        "RISK_ENABLE_GLOBAL_KILL_SWITCH =",
+        "RISK_MAX_STOP_LOSS_IN_12H =",
+        "RISK_DISABLE_ENTRY_ON_TRIGGER =",
+        "RISK_DISABLE_DURATION_HOURS ="
+    ],
+
+    "13. TOKEN SAFETY": [
+        "TOKEN_MAX_TRANSFER_TAX =",
+        "TOKEN_MAX_SINGLE_HOLDER_LIQUIDITY =",
+        "TOKEN_MIN_AGE_HOURS =",
+        "TOKEN_MIN_VOLUME_IF_NEW =",
+        "TOKEN_REQUIRE_NO_SELL_RESTRICTIONS ="
+    ],
+
+    "BONUS : META KEYWORDS": [
+        "MODE =",
+        "STRATEGY_TYPE =",
+        "GOAL =",
+        "CHAIN =",
+        "SMALL_TVL_MODE =",
+        "ENABLE_CAPITAL_CONCENTRATION =",
+        "ENABLE_MICRO_OPTIMIZATION ="
+    ]
+}
+
+# =========================
+# KEYWORDS UI
+# =========================
+st.markdown("## KEYWORDS LIBRARY")
+
+for category, values in keywords.items():
+
+    with st.expander(category):
+
+        for item in values:
+
+            col1, col2 = st.columns([8, 1])
+
+            with col1:
+                st.code(item)
+
+            with col2:
+                st.button(
+                    "📋",
+                    key=f"copy_{category}_{item}",
+                    help=f"Copy {item}"
+                )

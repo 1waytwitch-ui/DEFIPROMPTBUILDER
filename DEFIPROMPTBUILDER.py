@@ -318,13 +318,11 @@ prompt = f"""
 ### VAULT variables
 * BASE_CURRENCY = {BASE_CURRENCY}
 
-# Capital efficiency (SMALL VAULT MODE)
 * MIN_TOTAL_TVL_FOR_DIVERSIFICATION = ${MIN_POOL_TVL}
-* TARGET_STRATEGIES_SMALL_TVL = {max(1, max_strategies - 1)}
+* TARGET_STRATEGIES_SMALL_TVL = 1
 * TARGET_STRATEGIES_MEDIUM_TVL = {max_strategies}
 
-# Minimum viable actions
-* MIN_ACTION_VALUE = ${min_action}
+* MIN_ACTION_VALUE = $5
 
 ---
 
@@ -339,43 +337,75 @@ prompt = f"""
 * MIN_POOL_TVL = ${MIN_POOL_TVL}
 * MIN_POOL_VOLUME_24H = ${MIN_VOLUME_24H}
 * MIN_VOLUME_TVL_RATIO = 2
-* MIN_USD = ${min_action}
 
-# Strong concentration allowed
-* MAX_CAPITAL_PER_POOL_PERC = {max_capital_per_pool}%
+* MAX_CAPITAL_PER_POOL_PERC = 100%
 
 ---
 
-### ENTRY / OUT_RANGE variables
+### ENTRY / OUT_RANGE
 * PRICE_IMPACT = 0.15%
 * RANGE_VOL_MULT = 0.5
 * MIN_POSITION_RANGE_WIDTH = 5%
 * POSITION_RANGE_WIDTH = max(MIN_POSITION_RANGE_WIDTH, PriceVolatility × RANGE_VOL_MULT)
+* LOWER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
+* UPPER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
 
 ---
 
-### HARVEST variables
+### HARVEST
 * HARVEST_PERC = {HARVEST_PERC}%
-* MIN_HARVEST_USD = ${min_action}
+* MIN_HARVEST_USD = $2
 
 ---
 
-### EXIT variables
+### EXIT
 * STOP_LOSS_PERC = {STOP_LOSS}%
 * TAKE_PROFIT_PERC = {TAKE_PROFIT}%
+* MIN_POSITION_VALUE = $20
+
+---
+
+### DUST
+* MIN_DUST_SWAP_USD = $3
 
 ---
 
 ## HARD PRIORITY RULE
+EXIT ALWAYS OVERRIDES EVERYTHING
 
-EXIT conditions ALWAYS override any other action.
+---
+
+## CAPITAL CONCENTRATION LOGIC
+
+IF TVL < 150:
+    TARGET_STRATEGIES = 1
+ELSE:
+    TARGET_STRATEGIES = {max_strategies}
+
+IF ROI > 2x OR APR > 1.2x:
+    DOMINANT POSITION
+
+IF DOMINANT EXISTS:
+    EXIT weakest → REALLOCATE
+
+---
+
+## TOKEN SAFETY FILTER
+Reject if:
+* tax > 2%
+* sell restriction
+* >40% liquidity single holder
+* age < 24h AND volume < $300k
+
+---
+
+## EXECUTION RULE
+Do not execute if cost > 15% gain
 """
 
-# =========================
-# OUTPUT
-# =========================
-st.subheader(f"Detected Mode: {MODE}")
+st.subheader(f"Mode: {MODE}")
 st.code(prompt, language="markdown")
+
 
 # =========================
 # KEYWORD LIBRARY

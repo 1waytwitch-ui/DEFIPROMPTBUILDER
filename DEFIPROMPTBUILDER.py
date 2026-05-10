@@ -232,7 +232,7 @@ st.markdown("AUTO ADJUST WITH TVL")
 # =========================
 st.markdown("### DEGEN VAULT SETTINGS")
 
-with st.container():
+with st.container(a):
 
     st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 

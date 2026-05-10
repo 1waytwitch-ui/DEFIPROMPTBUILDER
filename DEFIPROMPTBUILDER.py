@@ -263,9 +263,7 @@ st.markdown("### DEGEN VAULT SETTINGS")
 
 with st.container():
 
-    auto_adjust_tvl = st.checkbox(
-        "Auto adjust",
-        help="Auto adjust with TVL"
+    st.caption("Auto adjust with TVL")
     )
     st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 

@@ -256,8 +256,6 @@ Utilisez uniquement un capital à risque avec une répartition réfléchie.
 """, unsafe_allow_html=True)
 
 
-st.markdown("AUTO ADJUST WITH TVL")
-
 # =========================
 # INPUTS
 # =========================
@@ -265,6 +263,10 @@ st.markdown("### DEGEN VAULT SETTINGS")
 
 with st.container():
 
+    auto_adjust_tvl = st.checkbox(
+        "Auto adjust",
+        help="Auto adjust with TVL"
+    )
     st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)

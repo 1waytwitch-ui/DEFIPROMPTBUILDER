@@ -73,6 +73,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
+
 # -----------------------
 # CODE SECRET - THEME TERMINAL AVEC BOUTON VALIDER + TYPING
 # -----------------------
@@ -194,7 +196,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
 st.markdown("AUTO ADJUST WITH TVL")
 
 # =========================

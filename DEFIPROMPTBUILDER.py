@@ -1,4 +1,15 @@
 import streamlit as st
+import requests
+import numpy as np
+import datetime
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
+import plotly.io as pio
+import yfinance as yf
+import math
+import time
+import random
 
 st.set_page_config(page_title="DeFi Vault Prompt Builder", layout="wide")
 
@@ -61,6 +72,127 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# -----------------------
+# CODE SECRET - THEME TERMINAL AVEC BOUTON VALIDER + TYPING
+# -----------------------
+SECRET_CODE = st.secrets["Secret_Code"]
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if "secret_content" not in st.session_state:
+    st.session_state.secret_content = []
+
+terminal_placeholder = st.empty()
+
+# ======= RENDER ======
+def render():
+    terminal_placeholder.markdown(
+        """
+        <div id='secret-terminal' class='checklist-terminal'>
+        """ + "<br>".join(st.session_state.secret_content) + """
+        <span class='cursor'></span>
+        </div>
+        <script>
+        const term = document.getElementById("secret-terminal");
+        if (term) { term.scrollTop = term.scrollHeight; }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ======= STYLE TERMINAL ======
+st.markdown("""
+<style>
+.checklist-terminal {
+    background-color: #000000;
+    border: 1px solid #00ff88;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    box-shadow: 0 0 12px rgba(0,255,150,0.15);
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.3;
+    max-height: 400px;
+    overflow-y: auto;
+}
+.cursor {
+    display: inline-block;
+    width: 8px;
+    background-color: #00ff88;
+    margin-left: 3px;
+    animation: blink 1s infinite;
+}
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.stButton>button {
+    background-color: black;
+    color: #00ff88;
+    border: 1px solid #00ff88;
+    font-family: monospace;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ======= TYPING / GLITCH ======
+def type_line(line):
+    st.session_state.secret_content.append("")
+    current = ""
+    for char in line:
+        current += char
+        st.session_state.secret_content[-1] = current
+        render()
+        time.sleep(random.uniform(0.01, 0.01))
+
+def subtle_glitch(line, chance=0.15):
+    if not st.session_state.secret_content:
+        return  # ✅ sécurité ajoutée
+
+    if random.random() < chance:
+        chars = list("█▓▒░<>/\\|#@$%&*")
+        glitched = "".join(random.choice(chars) for _ in range(len(line)))
+        st.session_state.secret_content[-1] = glitched
+        render()
+        time.sleep(0.01)
+
+def add_line(line, glitch=False):
+    type_line(line)  # ✅ corrigé (avant glitch)
+    if glitch:
+        subtle_glitch(line)
+    time.sleep(random.uniform(0.01, 0.1))
+
+# ======= TERMINAL AUTHENTICATION ======
+if not st.session_state.authenticated:
+
+    if not st.session_state.secret_content:
+        add_line("$ ACCESS PROTOCOL INITIALIZATION", glitch=True)
+        add_line("> Vérification des droits de la Team Élite KBOUR Crypto...")
+        add_line("> Veuillez saisir le code d'accès ci-dessous")
+
+    # INPUT STREAMLIT
+    code_input = st.text_input("Code d'accès", key="secret_code", type="password")
+
+    # BOUTON STREAMLIT
+    if st.button("Valider", use_container_width=True):
+        if code_input == SECRET_CODE:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            add_line("> [!] CODE INCORRECT", glitch=True)
+            st.error("Code incorrect")
+    st.stop()
+
+# ======= UNLOCK MESSAGE ======
+st.markdown("""
+<div style='color:#00ff88; font-family:monospace; font-size:13px; margin-top:10px;'>
+> ACCÈS AUTORISÉ — Bonjour et bienvenue !
+</div>
+""", unsafe_allow_html=True)
 
 st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
 st.markdown("AUTO ADJUST WITH TVL")

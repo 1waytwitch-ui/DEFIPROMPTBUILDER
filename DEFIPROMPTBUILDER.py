@@ -298,52 +298,248 @@ else:
     dominance = 0.55
 
 # =========================
-# PROMPT
+# PROMPT TEMPLATE
 # =========================
 prompt = f"""
 # AUTO-FARM INSTRUCTIONS
-
-## HYBRID AGGRESSIVE — AUTO MODE SWITCH + CAPITAL CONCENTRATION
-
----
-
-## VAULT STATE
-TVL = ${TVL}
-BASE_CURRENCY = {BASE_CURRENCY}
-MODE = {MODE}
+## HYBRID AGGRESSIVE — CAPITAL CONCENTRATION (SMALL TVL OPTIMIZED)
 
 ---
 
-## MODE PARAMETERS
-MAX_ACTIVE_STRATEGIES = {max_strategies}
-MAX_CAPITAL_PER_POOL = {max_capital_per_pool}%
-EXECUTION_COST_LIMIT = {execution_cost}%
-MIN_ACTION_VALUE = ${min_action}
-DOMINANCE_ALLOCATION = {dominance}
+## CONFIGURATION
+
+### VAULT variables
+* BASE_CURRENCY = {BASE_CURRENCY}
+
+# Capital efficiency (SMALL VAULT MODE)
+* MIN_TOTAL_TVL_FOR_DIVERSIFICATION = ${MIN_POOL_TVL}
+* TARGET_STRATEGIES_SMALL_TVL = {max(1, max_strategies - 1)}
+* TARGET_STRATEGIES_MEDIUM_TVL = {max_strategies}
+
+# Minimum viable actions
+* MIN_ACTION_VALUE = ${min_action}
 
 ---
 
-## POOL FILTERS
-MIN_APR_24H = {MIN_APR_24H}%
-MIN_APR_7D = {MIN_APR_7D}%
-MIN_POOL_TVL = ${MIN_POOL_TVL}
-MIN_VOLUME_24H = ${MIN_VOLUME_24H}
-MAX_VOLATILITY = {MAX_VOLATILITY}%
+### POOL variables
+* MAX_PRICE_VOLATILITY = {MAX_VOLATILITY}%
+* POOL_ACTION_TIMEFRAME = 24h
+* POOL_ACTION_TIMEFRAME_TP = 4h
+* APR_FRAME_SHORT = 24h
+* APR_FRAME_LONG = 7d
+* MIN_ELIGIBLE_APR_SHORT = {MIN_APR_24H}%
+* MIN_ELIGIBLE_APR_LONG = {MIN_APR_7D}%
+* MIN_POOL_TVL = ${MIN_POOL_TVL}
+* MIN_POOL_VOLUME_24H = ${MIN_VOLUME_24H}
+* MIN_VOLUME_TVL_RATIO = 2
+* MIN_USD = ${min_action}
+
+# Strong concentration allowed
+* MAX_CAPITAL_PER_POOL_PERC = {max_capital_per_pool}%
 
 ---
 
-## EXIT LOGIC
-STOP_LOSS = {STOP_LOSS}%
-TAKE_PROFIT = {TAKE_PROFIT}%
+### ENTRY / OUT_RANGE variables
+* PRICE_IMPACT = 0.15%
+* RANGE_VOL_MULT = 0.5
+* MIN_POSITION_RANGE_WIDTH = 5%
+* POSITION_RANGE_WIDTH = max(MIN_POSITION_RANGE_WIDTH, PriceVolatility × RANGE_VOL_MULT)
+* LOWER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
+* UPPER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
+
+---
+
+### HARVEST variables
+* HARVEST_PERC = {HARVEST_PERC}%
+* MIN_HARVEST_USD = ${min_action}
+
+---
+
+### EXIT variables
+* STOP_LOSS_PERC = {STOP_LOSS}%
+* TAKE_PROFIT_PERC = {TAKE_PROFIT}%
+* STOP_LOSS_SLIPPAGE_L1 = 15%
+* STOP_LOSS_SLIPPAGE_L2 = 25%
+
+# Micro position threshold
+* MIN_POSITION_VALUE = ${max(min_action * 4, 20)}
+
+---
+
+### DUST variables
+* MIN_DUST_SWAP_USD = ${max(2, int(min_action/2))}
+
+---
+
+## HARD PRIORITY RULE
+
+EXIT conditions ALWAYS override any other action.
+
+---
+
+## CAPITAL CONCENTRATION LOGIC
+
+### Strategy count control
+
+IF Vault TVL < MIN_TOTAL_TVL_FOR_DIVERSIFICATION:
+    TARGET_STRATEGIES = TARGET_STRATEGIES_SMALL_TVL
+
+ELSE:
+    TARGET_STRATEGIES = TARGET_STRATEGIES_MEDIUM_TVL
+
+---
+
+### Dominance rule (IMPROVED)
+
+IF one position has:
+    ROI > 2x other positions
+    OR APR > 1.2x other positions
+THEN:
+    Mark as DOMINANT
+
+---
+
+### Forced reallocation
+
+IF DOMINANT exists AND multiple positions:
+    EXIT weakest position
+    REALLOCATE to dominant position
+
+---
+
+### Micro-position cleanup
+
+IF position value < MIN_POSITION_VALUE:
+    EXIT (withdraw_and_swap)
+
+---
+
+## TOKEN SAFETY FILTER
+
+Reject pool if ANY:
+* Token transfer tax > 2%
+* Token has sell restrictions
+* >40% liquidity controlled by one address
+* Token age < 24h AND volume < $300k
+
+---
+
+## APR RELIABILITY FILTER
+
+APR valid ONLY if:
+* Based on fees
+* Updated < 60 min
+* Volume/TVL ≥ MIN_VOLUME_TVL_RATIO
+* APR spike ≤ 5x vs 7d
+
+---
+
+## EXECUTION COST FILTER
+
+Do not execute if:
+* Cost > {execution_cost}% of expected gain
+
+IF TVL < $100:
+* Allow up to 25%
+
+ALSO:
+* Do not execute if action size < MIN_ACTION_VALUE
+
+---
+
+## TOKEN EXPOSURE LIMIT
+
+IF TVL < $100:
+    Max exposure per token = 90%
+ELSE:
+    Max exposure per token = 50%
+
+---
+
+## DECISION FRAMEWORK
+
+1. Compute variables
+2. Apply CAPITAL CONCENTRATION
+3. Evaluate strategies:
+
+   EXIT → OUT_RANGE → HARVEST → INCREASE_LIQUIDITY
+
+4. Evaluate new:
+
+   POOL_SELECTION → ENTRY
+
+---
+
+## ENTRY
+
+Conditions:
+* Pool valid
+* Current strategies < TARGET_STRATEGIES
+
+Execution:
+1. swap_and_mint
+2. Allocate:
+
+   IF first position:
+       {int(dominance * 100)}–100% capital
+
+   IF second:
+       remaining only IF strong diversification
+
+Skip if:
+* Size < MIN_ACTION_VALUE
+
+---
+
+## INCREASE_LIQUIDITY
+
+Only if:
+* No better pool
+* ROI > 0%
+* Position is DOMINANT
 
 ---
 
 ## HARVEST
-HARVEST_TRIGGER = {HARVEST_PERC}%
-"""
 
-st.subheader(f"Detected Mode: {MODE}")
-st.code(prompt, language="markdown")
+Harvest ONLY if:
+* Fees ≥ HARVEST_PERC
+AND
+* Fees ≥ MIN_HARVEST_USD
+
+---
+
+## DUST
+
+IF TVL < $100:
+* Ignore dust unless > MIN_DUST_SWAP_USD
+
+---
+
+## EXIT
+
+Execute if:
+
+### Standard:
+* ROI < STOP_LOSS
+* ROI ≥ TAKE_PROFIT
+
+### Forced:
+* Position < MIN_POSITION_VALUE
+* Weakest vs dominant
+
+---
+
+## STOP-LOSS SLIPPAGE
+
+Same logic unchanged
+
+---
+
+## POOL FAILURE MEMORY
+
+Same logic unchanged
+"""
 
 # =========================
 # KEYWORDS DATABASE

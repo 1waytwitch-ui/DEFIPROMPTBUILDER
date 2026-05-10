@@ -264,11 +264,11 @@ st.markdown("### DEGEN VAULT SETTINGS")
 with st.container():
 
     st.caption("Auto adjust with TVL")
-    )
+
     st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
-
+    
     with col1:
         TVL = st.number_input("Vault TVL ($)", value=60.0)
         MIN_APR_24H = st.number_input("Min APR 24h (%)", value=1500)

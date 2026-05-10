@@ -45,10 +45,6 @@ st.markdown(
         color: #00ff66;
     }
 
-    .stSidebar {
-        background-color: #050805;
-    }
-
     .stCodeBlock {
         background-color: #050805 !important;
         color: #00ff66 !important;
@@ -66,6 +62,14 @@ st.markdown(
         background-color: #003314;
         color: #00ff66;
         box-shadow: 0px 0px 20px #00ff66;
+    }
+
+    .compact-box {
+        border: 1px solid #00ff66;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        background-color: #050805;
     }
 
     </style>
@@ -153,7 +157,7 @@ def type_line(line):
 
 def subtle_glitch(line, chance=0.15):
     if not st.session_state.secret_content:
-        return  # ✅ sécurité ajoutée
+        return
 
     if random.random() < chance:
         chars = list("█▓▒░<>/\\|#@$%&*")
@@ -163,7 +167,7 @@ def subtle_glitch(line, chance=0.15):
         time.sleep(0.01)
 
 def add_line(line, glitch=False):
-    type_line(line)  # ✅ corrigé (avant glitch)
+    type_line(line)
     if glitch:
         subtle_glitch(line)
     time.sleep(random.uniform(0.01, 0.1))
@@ -176,10 +180,8 @@ if not st.session_state.authenticated:
         add_line("> Vérification des droits de la Team Élite KBOUR Crypto...")
         add_line("> Veuillez saisir le code d'accès ci-dessous")
 
-    # INPUT STREAMLIT
     code_input = st.text_input("Code d'accès", key="secret_code", type="password")
 
-    # BOUTON STREAMLIT
     if st.button("Valider", use_container_width=True):
         if code_input == SECRET_CODE:
             st.session_state.authenticated = True
@@ -199,20 +201,34 @@ st.markdown("""
 st.markdown("AUTO ADJUST WITH TVL")
 
 # =========================
-# INPUTS
+# INPUTS COMPACTS EN HAUT
 # =========================
-st.sidebar.header("DEGEN VAULT SETTINGS")
+st.markdown("### DEGEN VAULT SETTINGS")
 
-TVL = st.sidebar.number_input("Vault TVL ($)", value=60.0)
-BASE_CURRENCY = st.sidebar.text_input("Base Currency", "USDT")
-MIN_APR_24H = st.sidebar.number_input("Min APR 24h (%)", value=1500)
-MIN_APR_7D = st.sidebar.number_input("Min APR 7d (%)", value=500)
-MIN_POOL_TVL = st.sidebar.number_input("Min Pool TVL ($)", value=15000)
-MIN_VOLUME_24H = st.sidebar.number_input("Min Volume 24h ($)", value=50000)
-MAX_VOLATILITY = st.sidebar.number_input("Max Volatility (%)", value=75)
-STOP_LOSS = st.sidebar.slider("Stop Loss (%)", -50, 0, -10)
-TAKE_PROFIT = st.sidebar.slider("Take Profit (%)", 5, 100, 25)
-HARVEST_PERC = st.sidebar.slider("Harvest Trigger (%)", 1, 20, 5)
+with st.container():
+    st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        TVL = st.number_input("Vault TVL ($)", value=60.0)
+        MIN_APR_24H = st.number_input("Min APR 24h (%)", value=1500)
+        MIN_POOL_TVL = st.number_input("Min Pool TVL ($)", value=15000)
+
+    with col2:
+        BASE_CURRENCY = st.text_input("Base Currency", "USDT")
+        MIN_APR_7D = st.number_input("Min APR 7d (%)", value=500)
+        MIN_VOLUME_24H = st.number_input("Min Volume 24h ($)", value=50000)
+
+    with col3:
+        MAX_VOLATILITY = st.number_input("Max Volatility (%)", value=75)
+        STOP_LOSS = st.slider("Stop Loss (%)", -50, 0, -10)
+
+    with col4:
+        TAKE_PROFIT = st.slider("Take Profit (%)", 5, 100, 25)
+        HARVEST_PERC = st.slider("Harvest Trigger (%)", 1, 20, 5)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
 # AUTO MODE SWITCH
@@ -224,6 +240,7 @@ if TVL < 100:
     execution_cost = 20
     min_action = 2
     dominance = 0.75
+
 elif TVL < 500:
     MODE = "SCALING"
     max_strategies = 3
@@ -231,6 +248,7 @@ elif TVL < 500:
     execution_cost = 15
     min_action = 3
     dominance = 0.65
+
 elif TVL < 2000:
     MODE = "OPTIMIZATION"
     max_strategies = 4
@@ -238,6 +256,7 @@ elif TVL < 2000:
     execution_cost = 10
     min_action = 5
     dominance = 0.6
+
 else:
     MODE = "AGGRESSIVE"
     max_strategies = 5
@@ -398,4 +417,3 @@ MINIMIZE:
 # =========================
 st.subheader(f"Detected Mode: {MODE}")
 st.code(prompt, language="markdown")
-

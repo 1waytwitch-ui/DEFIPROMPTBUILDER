@@ -86,14 +86,6 @@ st.markdown(
         box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
     }
 
-    .keyword-box {
-        border: 1px solid #00ff66;
-        border-radius: 6px;
-        padding: 8px;
-        margin-bottom: 6px;
-        background-color: #050805;
-    }
-
     </style>
     """,
     unsafe_allow_html=True
@@ -101,9 +93,9 @@ st.markdown(
 
 st.title("DEFI VAULT AUTO FARM AUTO PROMPT")
 
-# -----------------------
-# CODE SECRET
-# -----------------------
+# =========================
+# SECRET ACCESS
+# =========================
 SECRET_CODE = st.secrets["Secret_Code"]
 
 if "authenticated" not in st.session_state:
@@ -115,7 +107,7 @@ if "secret_content" not in st.session_state:
 terminal_placeholder = st.empty()
 
 # =========================
-# TERMINAL
+# TERMINAL RENDER
 # =========================
 def render():
     terminal_placeholder.markdown(
@@ -132,6 +124,9 @@ def render():
         unsafe_allow_html=True
     )
 
+# =========================
+# TERMINAL STYLE
+# =========================
 st.markdown("""
 <style>
 .checklist-terminal {
@@ -162,9 +157,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# =========================
+# TERMINAL EFFECTS
+# =========================
 def type_line(line):
     st.session_state.secret_content.append("")
     current = ""
+
     for char in line:
         current += char
         st.session_state.secret_content[-1] = current
@@ -172,6 +171,7 @@ def type_line(line):
         time.sleep(0.01)
 
 def subtle_glitch(line, chance=0.15):
+
     if not st.session_state.secret_content:
         return
 
@@ -184,6 +184,7 @@ def subtle_glitch(line, chance=0.15):
 
 def add_line(line, glitch=False):
     type_line(line)
+
     if glitch:
         subtle_glitch(line)
 
@@ -197,12 +198,18 @@ if not st.session_state.authenticated:
         add_line("> Vérification Team Élite KBOUR Crypto...")
         add_line("> Veuillez saisir le code d'accès")
 
-    code_input = st.text_input("Code d'accès", key="secret_code", type="password")
+    code_input = st.text_input(
+        "Code d'accès",
+        key="secret_code",
+        type="password"
+    )
 
     if st.button("Valider", use_container_width=True):
+
         if code_input == SECRET_CODE:
             st.session_state.authenticated = True
             st.rerun()
+
         else:
             add_line("> [!] CODE INCORRECT", glitch=True)
             st.error("Code incorrect")
@@ -267,34 +274,34 @@ Utilisez uniquement un capital à risque avec une répartition réfléchie.
 # =========================
 if TVL < 100:
     MODE = "SURVIVAL"
-    max_strategies = 2
-    max_capital_per_pool = 80
-    execution_cost = 20
+    max_strategies = 1
+    max_capital_per_pool = 100
+    execution_cost = 25
     min_action = 2
-    dominance = 0.75
+    dominance = 0.90
 
 elif TVL < 500:
     MODE = "SCALING"
-    max_strategies = 3
-    max_capital_per_pool = 70
-    execution_cost = 15
-    min_action = 3
-    dominance = 0.65
+    max_strategies = 2
+    max_capital_per_pool = 80
+    execution_cost = 20
+    min_action = 5
+    dominance = 0.80
 
 elif TVL < 2000:
     MODE = "OPTIMIZATION"
-    max_strategies = 4
-    max_capital_per_pool = 55
-    execution_cost = 10
-    min_action = 5
-    dominance = 0.6
+    max_strategies = 3
+    max_capital_per_pool = 60
+    execution_cost = 15
+    min_action = 10
+    dominance = 0.70
 
 else:
     MODE = "AGGRESSIVE"
     max_strategies = 5
     max_capital_per_pool = 45
     execution_cost = 10
-    min_action = 10
+    min_action = 15
     dominance = 0.55
 
 # =========================
@@ -344,8 +351,6 @@ prompt = f"""
 * RANGE_VOL_MULT = 0.5
 * MIN_POSITION_RANGE_WIDTH = 5%
 * POSITION_RANGE_WIDTH = max(MIN_POSITION_RANGE_WIDTH, PriceVolatility × RANGE_VOL_MULT)
-* LOWER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
-* UPPER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
 
 ---
 
@@ -358,193 +363,25 @@ prompt = f"""
 ### EXIT variables
 * STOP_LOSS_PERC = {STOP_LOSS}%
 * TAKE_PROFIT_PERC = {TAKE_PROFIT}%
-* STOP_LOSS_SLIPPAGE_L1 = 15%
-* STOP_LOSS_SLIPPAGE_L2 = 25%
-
-# Micro position threshold
-* MIN_POSITION_VALUE = ${max(min_action * 4, 20)}
-
----
-
-### DUST variables
-* MIN_DUST_SWAP_USD = ${max(2, int(min_action/2))}
 
 ---
 
 ## HARD PRIORITY RULE
 
 EXIT conditions ALWAYS override any other action.
-
----
-
-## CAPITAL CONCENTRATION LOGIC
-
-### Strategy count control
-
-IF Vault TVL < MIN_TOTAL_TVL_FOR_DIVERSIFICATION:
-    TARGET_STRATEGIES = TARGET_STRATEGIES_SMALL_TVL
-
-ELSE:
-    TARGET_STRATEGIES = TARGET_STRATEGIES_MEDIUM_TVL
-
----
-
-### Dominance rule (IMPROVED)
-
-IF one position has:
-    ROI > 2x other positions
-    OR APR > 1.2x other positions
-THEN:
-    Mark as DOMINANT
-
----
-
-### Forced reallocation
-
-IF DOMINANT exists AND multiple positions:
-    EXIT weakest position
-    REALLOCATE to dominant position
-
----
-
-### Micro-position cleanup
-
-IF position value < MIN_POSITION_VALUE:
-    EXIT (withdraw_and_swap)
-
----
-
-## TOKEN SAFETY FILTER
-
-Reject pool if ANY:
-* Token transfer tax > 2%
-* Token has sell restrictions
-* >40% liquidity controlled by one address
-* Token age < 24h AND volume < $300k
-
----
-
-## APR RELIABILITY FILTER
-
-APR valid ONLY if:
-* Based on fees
-* Updated < 60 min
-* Volume/TVL ≥ MIN_VOLUME_TVL_RATIO
-* APR spike ≤ 5x vs 7d
-
----
-
-## EXECUTION COST FILTER
-
-Do not execute if:
-* Cost > {execution_cost}% of expected gain
-
-IF TVL < $100:
-* Allow up to 25%
-
-ALSO:
-* Do not execute if action size < MIN_ACTION_VALUE
-
----
-
-## TOKEN EXPOSURE LIMIT
-
-IF TVL < $100:
-    Max exposure per token = 90%
-ELSE:
-    Max exposure per token = 50%
-
----
-
-## DECISION FRAMEWORK
-
-1. Compute variables
-2. Apply CAPITAL CONCENTRATION
-3. Evaluate strategies:
-
-   EXIT → OUT_RANGE → HARVEST → INCREASE_LIQUIDITY
-
-4. Evaluate new:
-
-   POOL_SELECTION → ENTRY
-
----
-
-## ENTRY
-
-Conditions:
-* Pool valid
-* Current strategies < TARGET_STRATEGIES
-
-Execution:
-1. swap_and_mint
-2. Allocate:
-
-   IF first position:
-       {int(dominance * 100)}–100% capital
-
-   IF second:
-       remaining only IF strong diversification
-
-Skip if:
-* Size < MIN_ACTION_VALUE
-
----
-
-## INCREASE_LIQUIDITY
-
-Only if:
-* No better pool
-* ROI > 0%
-* Position is DOMINANT
-
----
-
-## HARVEST
-
-Harvest ONLY if:
-* Fees ≥ HARVEST_PERC
-AND
-* Fees ≥ MIN_HARVEST_USD
-
----
-
-## DUST
-
-IF TVL < $100:
-* Ignore dust unless > MIN_DUST_SWAP_USD
-
----
-
-## EXIT
-
-Execute if:
-
-### Standard:
-* ROI < STOP_LOSS
-* ROI ≥ TAKE_PROFIT
-
-### Forced:
-* Position < MIN_POSITION_VALUE
-* Weakest vs dominant
-
----
-
-## STOP-LOSS SLIPPAGE
-
-Same logic unchanged
-
----
-
-## POOL FAILURE MEMORY
-
-Same logic unchanged
 """
 
 # =========================
-# KEYWORDS DATABASE
+# OUTPUT
+# =========================
+st.subheader(f"Detected Mode: {MODE}")
+st.code(prompt, language="markdown")
+
+# =========================
+# KEYWORD LIBRARY
 # =========================
 keywords = {
+
     "1. STRUCTURE GLOBALE": [
         "CATEGORY_KEY_NAME ="
     ],
@@ -679,24 +516,23 @@ keywords = {
 }
 
 # =========================
-# KEYWORDS UI
+# KEYWORD LIBRARY UI
 # =========================
-st.markdown("## KEYWORDS LIBRARY")
+st.markdown("## KEYWORD LIBRARY")
 
 for category, values in keywords.items():
 
     with st.expander(category):
 
-        for item in values:
+        for keyword in values:
 
-            col1, col2 = st.columns([8, 1])
+            col1, col2 = st.columns([10, 1])
 
             with col1:
-                st.code(item)
+                st.code(keyword)
 
             with col2:
                 st.button(
                     "📋",
-                    key=f"copy_{category}_{item}",
-                    help=f"Copy {item}"
+                    key=f"{category}_{keyword}"
                 )

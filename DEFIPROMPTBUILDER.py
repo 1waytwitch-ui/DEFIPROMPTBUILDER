@@ -220,12 +220,18 @@ if not st.session_state.authenticated:
 # HEADER
 # =========================
 st.markdown("""
-<div style='color:#00ff88; font-family:monospace; font-size:13px; margin-top:10px;'>
-> ACCÈS AUTORISÉ — Bonjour et bienvenue !<br><br>
+<div style='font-family:monospace; font-size:13px; margin-top:10px;'>
+    <span style='color:#00ff88;'>
+        > ACCÈS AUTORISÉ — Bonjour et bienvenue !
+    </span>
 
-⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
-Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
-Utilisez uniquement un capital à risque avec une répartition réfléchie.
+    <br><br>
+
+    <span style='color:#ff4d4d; font-weight:bold;'>
+        ⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
+        Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
+        Utilisez uniquement un capital à risque avec une répartition réfléchie.
+    </span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -262,16 +268,6 @@ with st.container():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# =========================
-# DISCLAIMER
-# =========================
-st.markdown("""
-<div class='warning-box'>
-⚠ <b>DISCLAIMER</b> — Outil éducatif uniquement. Aucun conseil en investissement.<br>
-Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
-Utilisez uniquement un capital à risque avec une répartition réfléchie.
-</div>
-""", unsafe_allow_html=True)
 
 # =========================
 # AUTO MODE

@@ -221,7 +221,11 @@ if not st.session_state.authenticated:
 # =========================
 st.markdown("""
 <div style='color:#00ff88; font-family:monospace; font-size:13px; margin-top:10px;'>
-> ACCÈS AUTORISÉ — Bonjour et bienvenue !
+> ACCÈS AUTORISÉ — Bonjour et bienvenue !<br><br>
+
+⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
+Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
+Utilisez uniquement un capital à risque avec une répartition réfléchie.
 </div>
 """, unsafe_allow_html=True)
 

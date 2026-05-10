@@ -228,14 +228,33 @@ st.markdown("""
 
 <br><br>
 
-<span style='color:#ff4d4d; font-weight:bold;'>
-⚠ DISCLAIMER — Outil éducatif uniquement. Aucun conseil en investissement.<br>
-Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br>
+<div style='
+    background: rgba(255, 0, 0, 0.08);
+    border: 1px solid rgba(255, 80, 80, 0.8);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #ff4d4d;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.15);
+'>
+
+<span style='font-weight:bold; font-size:14px;'>
+⚠ WARNING — DISCLAIMER
+</span>
+
+<br><br>
+
+Outil éducatif uniquement. Aucun conseil en investissement.<br>
+Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br><br>
+
+<span style='color:#ff8080;'>
 Utilisez uniquement un capital à risque avec une répartition réfléchie.
 </span>
 
 </div>
+
+</div>
 """, unsafe_allow_html=True)
+
 
 st.markdown("AUTO ADJUST WITH TVL")
 

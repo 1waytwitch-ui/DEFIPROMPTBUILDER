@@ -608,6 +608,47 @@ st.code(prompt, language="markdown")
 
 
 # =========================
+# PARAMETER TILES UI
+# =========================
+
+st.markdown("## VAULT PARAMETERS (MANUAL OVERRIDE)")
+
+st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.subheader("Core")
+    min_range = st.slider("Minimum Range (%)", 1, 50, 5)
+    min_tvl = st.number_input("Minimum TVL ($)", value=15000)
+    default_asset = st.text_input("Default Asset", "USDT")
+    cooldown = st.number_input("Cooldown (minutes)", value=5)
+
+with col2:
+    st.subheader("Execution")
+    max_swap_slippage = st.slider("Max Swap Slippage (%)", 0.1, 10.0, 3.0)
+    max_withdraw_slippage = st.slider("Max Withdraw Slippage (%)", 0.1, 10.0, 3.0)
+    max_liquidity_slippage = st.slider("Max Liquidity Slippage (%)", 0.1, 10.0, 3.0)
+    gas_ceiling = st.number_input("Gas Fee Ceiling ($)", value=2.5)
+
+with col3:
+    st.subheader("Strategy")
+    max_value_strategy = st.slider("Max Value per Strategy (%)", 10, 100, 100)
+    max_drawdown = st.slider("Max Drawdown (%)", -50, 0, -25)
+    min_fees = st.number_input("Min Fees ($)", value=2.0)
+    prioritize_by = st.selectbox("Prioritize By", ["APR", "Volume", "Fees", "Score"])
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# =========================
+# ADVANCED SETTINGS
+# =========================
+
+with st.expander("Advanced Settings"):
+    adv_min_apr = st.number_input("Min APR (%)", value=1500)
+    adv_min_volume = st.number_input("Min Volume ($)", value=50000)
+
+# =========================
 # KEYWORD LIBRARY
 # =========================
 keywords = {

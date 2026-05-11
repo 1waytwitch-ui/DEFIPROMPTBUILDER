@@ -683,7 +683,6 @@ with col1:
     tile("Minimum Range", "5%")
     tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
     tile("Default Asset", BASE_CURRENCY)
-    tile("Mode", MODE)
 
 # =========================
 # EXECUTION
@@ -711,7 +710,7 @@ with col4:
     tile("Min APR 7d", f"{MIN_APR_7D}%")
     tile("Min Volume 24h", f"${MIN_VOLUME_24H:,.0f}")
     tile("Agent Scan Cooldown", f"{scan_minutes} min")
-    tile("Capital / Pool", f"{max_capital_per_pool}%") 
+    tile("Capital / Pool", f"{max_capital_per_pool}%")
 
 st.markdown("</div>", unsafe_allow_html=True)
 

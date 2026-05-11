@@ -245,10 +245,10 @@ st.markdown("""
 <br><br>
 
 Outil éducatif uniquement. Aucun conseil en investissement.<br>
-Le DeFi degen comporte un risque élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br><br>
+La DeFi degen comporte un risque très élevé de perte totale du capital (hack, rug, volatilité, smart contract).<br><br>
 
 <span style='color:#ff8080;'>
-Utilisez uniquement un capital à risque avec une répartition réfléchie.
+Utilisez uniquement un capital à risque avec une allocation maîtrisée...
 </span>
 
 </div>
@@ -685,7 +685,7 @@ def tile(title, value):
     """, unsafe_allow_html=True)
 
 # =========================
-# GRID ARKHAM (4 MODULES)
+# GRID (4 MODULES)
 # =========================
 col1, col2, col3, col4 = st.columns(4)
 
@@ -717,7 +717,7 @@ with col3:
     tile("Default Asset", BASE_CURRENCY)
     tile("Max Value / Strategy", f"{max_capital_per_pool}%")
     tile("Min Fees Threshold", "$2")
-    tile("Range Model", "Dynamic 5%+ Volatility Scaling")
+    tile("Range Model", "Dynamic min. 5% + Volatility Scaling")
 
 # =========================
 # MARKET INTELLIGENCE MODULE

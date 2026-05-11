@@ -642,7 +642,7 @@ st.text_area(
 )
 
 # =========================
-# PARAMETER TILES
+# PARAMETER IA VAULT
 # =========================
 
 # --- Dynamic cooldown (agent scan)
@@ -655,66 +655,81 @@ elif TVL < 2000:
 else:
     scan_minutes = 120
 
-st.markdown("## VAULT PARAMETERS")
+st.markdown("## VAULT INTELLIGENCE PANEL")
 
-st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
+st.markdown("""
+<div style="
+    border:1px solid #00ff66;
+    padding:12px;
+    border-radius:10px;
+    background:#050805;
+    box-shadow:0 0 12px rgba(0,255,100,0.12);
+">
+""", unsafe_allow_html=True)
 
 def tile(title, value):
     st.markdown(f"""
     <div style="
-        border:1px solid #00ff66;
-        padding:10px;
-        border-radius:8px;
-        margin-bottom:10px;
-        background:#050805;
-        box-shadow:0 0 8px rgba(0,255,100,0.15);
+        border-left:2px solid #00ff66;
+        padding:8px 10px;
+        margin-bottom:8px;
+        background:rgba(0,255,102,0.03);
     ">
-        <div style="font-size:11px; opacity:0.7;">{title}</div>
-        <div style="font-size:16px; font-weight:bold;">{value}</div>
+        <div style="font-size:11px; opacity:0.6; text-transform:uppercase;">
+            {title}
+        </div>
+        <div style="font-size:15px; font-weight:600; color:#00ff66;">
+            {value}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
+# =========================
+# GRID ARKHAM (4 MODULES)
+# =========================
 col1, col2, col3, col4 = st.columns(4)
 
 # =========================
-# CORE
+# RISK MODULE
 # =========================
 with col1:
-    tile("Minimum Range", "5%")
-    tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
-    tile("Default Asset", BASE_CURRENCY)
-    tile("Capital / Pool", f"{max_capital_per_pool}%")  # ✅ remplacé ici
+    st.markdown("### RISK")
+    tile("Min TVL", f"${MIN_POOL_TVL:,.0f}")
+    tile("Drawdown Cap", "-25%")
+    tile("Min Action Size", f"${min_action}")
+    tile("Capital Exposure", f"{max_capital_per_pool}%")
 
 # =========================
-# EXECUTION
+# EXECUTION MODULE
 # =========================
 with col2:
-    tile("Max Swap Slippage", "3%")
-    tile("Max Withdraw Slippage", "3%")
-    tile("Max Liquidity Slippage", "3%")
-    tile("Execution Cost Limit", f"{execution_cost}%")
+    st.markdown("### EXECUTION")
+    tile("Swap Slippage", "3%")
+    tile("Withdraw Slippage", "3%")
+    tile("Liquidity Slippage", "3%")
+    tile("Execution Cost Cap", f"{execution_cost}%")
 
 # =========================
-# STRATEGY
+# STRATEGY MODULE
 # =========================
 with col3:
-    tile("Max Value per Strategy", f"{max_capital_per_pool}%")
-    tile("Max Drawdown", "-25%")
-    tile("Min Fees", "$2")
-    tile("Min Action Size", f"${min_action}")
+    st.markdown("### STRATEGY")
+    tile("Default Asset", BASE_CURRENCY)
+    tile("Max Value / Strategy", f"{max_capital_per_pool}%")
+    tile("Min Fees Threshold", "$2")
+    tile("Range Model", "Dynamic 5%+ Volatility Scaling")
 
 # =========================
-# SCAN / MARKET FILTERS
+# MARKET INTELLIGENCE MODULE
 # =========================
 with col4:
+    st.markdown("### MARKET")
     tile("Min APR 24h", f"{MIN_APR_24H}%")
     tile("Min APR 7d", f"{MIN_APR_7D}%")
-    tile("Min Volume 24h", f"${MIN_VOLUME_24H:,.0f}")
-    tile("Agent Scan Cooldown", f"{scan_minutes} min")
-
+    tile("Min Volume", f"${MIN_VOLUME_24H:,.0f}")
+    tile("Scan Interval", f"{scan_minutes} min")
 
 st.markdown("</div>", unsafe_allow_html=True)
-
 # =========================
 # KEYWORD LIBRARY
 # =========================

@@ -330,98 +330,277 @@ else:
 # =========================
 prompt = f"""
 # AUTO-FARM INSTRUCTIONS
-## HYBRID AGGRESSIVE — CAPITAL CONCENTRATION (SMALL TVL OPTIMIZED)
+## HYBRID AGGRESSIVE — SMALL TVL OPTIMIZED (v3 PRO)
 
 ---
 
-## CONFIGURATION
+## 1. CORE CONFIGURATION
 
-### VAULT variables
-* BASE_CURRENCY = {BASE_CURRENCY}
+### VAULT
+BASE_CURRENCY = {BASE_CURRENCY}
+TVL = ${TVL}
 
-* MIN_TOTAL_TVL_FOR_DIVERSIFICATION = ${MIN_POOL_TVL}
-* TARGET_STRATEGIES_SMALL_TVL = 1
-* TARGET_STRATEGIES_MEDIUM_TVL = {max_strategies}
+MIN_TOTAL_TVL_FOR_DIVERSIFICATION = $150
+TARGET_STRATEGIES_SMALL_TVL = 1
+TARGET_STRATEGIES_MEDIUM_TVL = {max_strategies}
 
-* MIN_ACTION_VALUE = $5
-
----
-
-### POOL variables
-* MAX_PRICE_VOLATILITY = {MAX_VOLATILITY}%
-* POOL_ACTION_TIMEFRAME = 24h
-* POOL_ACTION_TIMEFRAME_TP = 4h
-* APR_FRAME_SHORT = 24h
-* APR_FRAME_LONG = 7d
-* MIN_ELIGIBLE_APR_SHORT = {MIN_APR_24H}%
-* MIN_ELIGIBLE_APR_LONG = {MIN_APR_7D}%
-* MIN_POOL_TVL = ${MIN_POOL_TVL}
-* MIN_POOL_VOLUME_24H = ${MIN_VOLUME_24H}
-* MIN_VOLUME_TVL_RATIO = 2
-
-* MAX_CAPITAL_PER_POOL_PERC = 100%
+MIN_ACTION_VALUE = ${min_action}
 
 ---
 
-### ENTRY / OUT_RANGE
-* PRICE_IMPACT = 0.15%
-* RANGE_VOL_MULT = 0.5
-* MIN_POSITION_RANGE_WIDTH = 5%
-* POSITION_RANGE_WIDTH = max(MIN_POSITION_RANGE_WIDTH, PriceVolatility × RANGE_VOL_MULT)
-* LOWER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
-* UPPER_RANGE_PERC = POSITION_RANGE_WIDTH / 2
+## 2. DYNAMIC APR THRESHOLDS
 
----
+IF TVL < $100:
+  MIN_APR_24h = {max(MIN_APR_24H, 2000)}%
+  MIN_APR_7d = {max(MIN_APR_7D, 600)}%
 
-### HARVEST
-* HARVEST_PERC = {HARVEST_PERC}%
-* MIN_HARVEST_USD = $2
+ELSE IF TVL < $300:
+  MIN_APR_24h = {MIN_APR_24H}%
+  MIN_APR_7d = {MIN_APR_7D}%
 
----
-
-### EXIT
-* STOP_LOSS_PERC = {STOP_LOSS}%
-* TAKE_PROFIT_PERC = {TAKE_PROFIT}%
-* MIN_POSITION_VALUE = $20
-
----
-
-### DUST
-* MIN_DUST_SWAP_USD = $3
-
----
-
-## HARD PRIORITY RULE
-EXIT ALWAYS OVERRIDES EVERYTHING
-
----
-
-## CAPITAL CONCENTRATION LOGIC
-
-IF TVL < 150:
-    TARGET_STRATEGIES = 1
 ELSE:
-    TARGET_STRATEGIES = {max_strategies}
-
-IF ROI > 2x OR APR > 1.2x:
-    DOMINANT POSITION
-
-IF DOMINANT EXISTS:
-    EXIT weakest → REALLOCATE
+  MIN_APR_24h = 800%
+  MIN_APR_7d = 300%
 
 ---
 
-## TOKEN SAFETY FILTER
+## 3. POOL FILTERS
+
+MIN_POOL_TVL = ${MIN_POOL_TVL}
+MIN_POOL_VOLUME_24H = ${MIN_VOLUME_24H}
+MIN_VOLUME_TVL_RATIO = 2
+
+MAX_PRICE_VOLATILITY = {MAX_VOLATILITY}%
+MAX_CAPITAL_PER_POOL_PERC = {max_capital_per_pool}%
+
+Reject pool if ANY:
+- APR_24h > 5x APR_7d (fake spike)
+- Drawdown <= -25%
+- Volume/TVL < 2
+- Token tax > 2%
+- Token sell restriction
+- Token age < 24h AND volume < $300k
+- >40% liquidity controlled by one wallet
+
+---
+
+## 4. POOL SCORING (MANDATORY)
+
+VolumeTVL = Volume / TVL
+
+PoolScore =
+  (APR_24h * 0.35)
++ (APR_7d * 0.35)
++ (VolumeTVL * 100 * 0.15)
+- (abs(Drawdown) * 20)
+- (Volatility * 10)
+
+→ ALWAYS select highest score
+
+---
+
+## 5. CAPITAL CONCENTRATION
+
+IF TVL < MIN_TOTAL_TVL_FOR_DIVERSIFICATION:
+  TARGET_STRATEGIES = 1
+ELSE:
+  TARGET_STRATEGIES = {max_strategies}
+
+---
+
+### DOMINANCE LOGIC
+
+IF one position has:
+  ROI > 2x others
+  OR APR > 1.2x others
+
+→ mark as DOMINANT
+
+---
+
+### FORCED REALLOCATION
+
+IF DOMINANT exists AND multiple positions:
+  EXIT weakest
+  REALLOCATE to dominant
+
+---
+
+### MICRO CLEANUP
+
+IF position value < $20:
+  EXIT
+
+---
+
+## 6. RANGE OPTIMIZATION (HIGH IMPACT)
+
+MIN_POSITION_RANGE_WIDTH = 5%
+RANGE_VOL_MULT = 0.5
+
+POSITION_RANGE_WIDTH =
+  max(5%, Volatility × 0.5)
+
+---
+
+### PRE-ADJUST RANGE
+
+range_ratio =
+  (price - lower) / (upper - lower)
+
+IF:
+  range_ratio < 20%
+  OR range_ratio > 80%
+
+→ adjust_range
+
+---
+
+## 7. ENTRY
+
+Conditions:
+- strategies < TARGET_STRATEGIES
+- pool passes filters
+- pool is top PoolScore
+
+Allocation:
+
+IF first position:
+  80–100% capital
+
+IF second:
+  remaining capital ONLY if diversification valid
+
 Reject if:
-* tax > 2%
-* sell restriction
-* >40% liquidity single holder
-* age < 24h AND volume < $300k
+- size < MIN_ACTION_VALUE
 
 ---
 
-## EXECUTION RULE
-Do not execute if cost > 15% gain
+## 8. INCREASE LIQUIDITY
+
+ONLY IF:
+- no better pool exists
+- ROI > 0%
+- position is DOMINANT
+- position IN_RANGE
+
+---
+
+## 9. HARVEST (OPTIMIZED)
+
+HARVEST if:
+
+fees ≥ {HARVEST_PERC}%
+OR
+fees ≥ gas * 3
+
+AND fees ≥ $2
+
+---
+
+## 10. EXECUTION COST FILTER
+
+IF TVL < $100:
+  MAX_COST_RATIO = {execution_cost}%
+ELSE:
+  MAX_COST_RATIO = 15%
+
+Reject action if:
+cost > expected_gain * MAX_COST_RATIO
+
+---
+
+## 11. EARLY CAPTURE EXIT (ANTI-FAKE YIELD)
+
+IF:
+- age ≥ 60 min
+- position APR < 10% of pool APR
+- fees < $0.02
+
+→ EXIT (fake yield trap)
+
+---
+
+## 12. EXIT RULES
+
+EXIT if ANY:
+
+### Standard
+- ROI < {STOP_LOSS}%
+- ROI ≥ {TAKE_PROFIT}%
+
+### Drawdown
+- Pool drawdown ≤ -25%
+AND ROI < 0%
+
+### Volatility
+- Volatility > {MAX_VOLATILITY}%
+
+### Micro
+- position < $20
+
+### Dominance
+- weakest vs dominant
+
+---
+
+## 13. STOP-LOSS SLIPPAGE
+
+IF ROI < -70%:
+  SLIPPAGE = 25%
+
+ELSE IF ROI < -50%:
+  SLIPPAGE = 15%
+
+---
+
+## 14. COOLDOWN / ANTI-TRAP
+
+IF exited pool:
+  block re-entry 12h
+
+IF drawdown ≤ -25%:
+  block until recovery
+
+---
+
+## 15. TOKEN EXPOSURE
+
+IF TVL < $100:
+  max per token = 90%
+ELSE:
+  max per token = 50%
+
+---
+
+## 16. DECISION ORDER (STRICT)
+
+1. EXIT
+2. PRE-ADJUST RANGE
+3. OUT_RANGE
+4. HARVEST
+5. INCREASE
+6. ENTRY
+
+---
+
+## 17. OUTPUT RULES
+
+- JSON ONLY
+- max 5 actions
+- no explanation outside JSON
+- prefer no action over bad action
+
+---
+
+## 18. CORE PRINCIPLES
+
+- Maximize fees, not just APR
+- APR alone is never sufficient
+- Prefer concentration over diversification (small TVL)
+- Avoid fake yield traps
+- Always consider execution cost
+- Prefer no action over low-confidence action
 """
 
 st.subheader(f"Mode: {MODE}")

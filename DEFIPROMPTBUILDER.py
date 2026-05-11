@@ -603,8 +603,20 @@ ELSE:
 - Prefer no action over low-confidence action
 """
 
+# =========================
+# PROMPT OUTPUT (SCROLL BOX)
+# =========================
+
 st.subheader(f"Mode: {MODE}")
-st.code(prompt, language="markdown")
+
+st.markdown("### PROMPT GENERATED")
+
+st.text_area(
+    label="",
+    value=prompt,
+    height=650,          
+    disabled=True        
+)
 
 
 # =========================

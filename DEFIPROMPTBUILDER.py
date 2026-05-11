@@ -683,6 +683,7 @@ with col1:
     tile("Minimum Range", "5%")
     tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
     tile("Default Asset", BASE_CURRENCY)
+    tile("Capital / Pool", f"{max_capital_per_pool}%")  # ✅ remplacé ici
 
 # =========================
 # EXECUTION
@@ -713,7 +714,6 @@ with col4:
     tile("Capital / Pool", f"{max_capital_per_pool}%")
 
 st.markdown("</div>", unsafe_allow_html=True)
-
 
 # =========================
 # KEYWORD LIBRARY

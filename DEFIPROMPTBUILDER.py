@@ -608,45 +608,71 @@ st.code(prompt, language="markdown")
 
 
 # =========================
-# PARAMETER TILES UI
+# PARAMETER TILES (DISPLAY ONLY)
 # =========================
 
-st.markdown("## VAULT PARAMETERS (MANUAL OVERRIDE)")
+st.markdown("## VAULT PARAMETERS")
 
 st.markdown("<div class='compact-box'>", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
+def tile(title, value):
+    st.markdown(f"""
+    <div style="
+        border:1px solid #00ff66;
+        padding:10px;
+        border-radius:8px;
+        margin-bottom:10px;
+        background:#050805;
+        box-shadow:0 0 8px rgba(0,255,100,0.15);
+    ">
+        <div style="font-size:11px; opacity:0.7;">{title}</div>
+        <div style="font-size:16px; font-weight:bold;">{value}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.subheader("Core")
-    min_range = st.slider("Minimum Range (%)", 1, 50, 5)
-    min_tvl = st.number_input("Minimum TVL ($)", value=15000)
-    default_asset = st.text_input("Default Asset", "USDT")
-    cooldown = st.number_input("Cooldown (minutes)", value=5)
+    tile("Minimum Range", "5%")
+    tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
+    tile("Default Asset", BASE_CURRENCY)
 
 with col2:
-    st.subheader("Execution")
-    max_swap_slippage = st.slider("Max Swap Slippage (%)", 0.1, 10.0, 3.0)
-    max_withdraw_slippage = st.slider("Max Withdraw Slippage (%)", 0.1, 10.0, 3.0)
-    max_liquidity_slippage = st.slider("Max Liquidity Slippage (%)", 0.1, 10.0, 3.0)
-    gas_ceiling = st.number_input("Gas Fee Ceiling ($)", value=2.5)
+    tile("Max Swap Slippage", "3%")
+    tile("Max Withdraw Slippage", "3%")
+    tile("Max Liquidity Slippage", "3%")
 
 with col3:
-    st.subheader("Strategy")
-    max_value_strategy = st.slider("Max Value per Strategy (%)", 10, 100, 100)
-    max_drawdown = st.slider("Max Drawdown (%)", -50, 0, -25)
-    min_fees = st.number_input("Min Fees ($)", value=2.0)
-    prioritize_by = st.selectbox("Prioritize By", ["APR", "Volume", "Fees", "Score"])
+    tile("Max Value per Strategy", f"{max_capital_per_pool}%")
+    tile("Max Drawdown", "-25%")
+    tile("Min Fees", "$2")
+
+with col4:
+    tile("Min APR 24h", f"{MIN_APR_24H}%")
+    tile("Min Volume 24h", f"${MIN_VOLUME_24H:,.0f}")
+    tile("Cooldown (scan)", f"{int(60 / (1 if TVL < 100 else 0.5))} sec")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
-# ADVANCED SETTINGS
+# ADVANCED SETTINGS (DISPLAY)
 # =========================
 
 with st.expander("Advanced Settings"):
-    adv_min_apr = st.number_input("Min APR (%)", value=1500)
-    adv_min_volume = st.number_input("Min Volume ($)", value=50000)
+
+    colA, colB, colC = st.columns(3)
+
+    with colA:
+        tile("APR 7d", f"{MIN_APR_7D}%")
+        tile("Volatility Max", f"{MAX_VOLATILITY}%")
+
+    with colB:
+        tile("Execution Cost Limit", f"{execution_cost}%")
+        tile("Mode", MODE)
+
+    with colC:
+        tile("Strategy Count", max_strategies)
+        tile("Min Action Size", f"${min_action}")
 
 # =========================
 # KEYWORD LIBRARY

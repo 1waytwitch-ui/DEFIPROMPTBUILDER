@@ -647,11 +647,11 @@ st.text_area(
 
 # --- Dynamic cooldown (agent scan)
 if TVL < 100:
-    scan_minutes = 30
-elif TVL < 500:
-    scan_minutes = 45
-elif TVL < 2000:
     scan_minutes = 60
+elif TVL < 500:
+    scan_minutes = 30
+elif TVL < 2000:
+    scan_minutes = 30
 else:
     scan_minutes = 120
 

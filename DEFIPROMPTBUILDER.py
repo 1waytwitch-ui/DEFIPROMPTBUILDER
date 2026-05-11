@@ -608,8 +608,18 @@ st.code(prompt, language="markdown")
 
 
 # =========================
-# PARAMETER TILES (DISPLAY ONLY)
+# PARAMETER TILES (SYNC WITH PROMPT)
 # =========================
+
+# --- Dynamic cooldown (agent scan)
+if TVL < 100:
+    scan_minutes = 30
+elif TVL < 500:
+    scan_minutes = 45
+elif TVL < 2000:
+    scan_minutes = 60
+else:
+    scan_minutes = 120
 
 st.markdown("## VAULT PARAMETERS")
 
@@ -632,30 +642,43 @@ def tile(title, value):
 
 col1, col2, col3, col4 = st.columns(4)
 
+# =========================
+# CORE
+# =========================
 with col1:
     tile("Minimum Range", "5%")
     tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
     tile("Default Asset", BASE_CURRENCY)
 
+# =========================
+# EXECUTION
+# =========================
 with col2:
     tile("Max Swap Slippage", "3%")
     tile("Max Withdraw Slippage", "3%")
     tile("Max Liquidity Slippage", "3%")
 
+# =========================
+# STRATEGY
+# =========================
 with col3:
     tile("Max Value per Strategy", f"{max_capital_per_pool}%")
     tile("Max Drawdown", "-25%")
     tile("Min Fees", "$2")
 
+# =========================
+# SCAN / MARKET FILTERS
+# =========================
 with col4:
     tile("Min APR 24h", f"{MIN_APR_24H}%")
+    tile("Min APR 7d", f"{MIN_APR_7D}%")
     tile("Min Volume 24h", f"${MIN_VOLUME_24H:,.0f}")
-    tile("Cooldown (scan)", f"{int(60 / (1 if TVL < 100 else 0.5))} sec")
+    tile("Agent Scan Cooldown", f"{scan_minutes} min")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
-# ADVANCED SETTINGS (DISPLAY)
+# ADVANCED SETTINGS (DISPLAY ONLY)
 # =========================
 
 with st.expander("Advanced Settings"):
@@ -663,17 +686,16 @@ with st.expander("Advanced Settings"):
     colA, colB, colC = st.columns(3)
 
     with colA:
-        tile("APR 7d", f"{MIN_APR_7D}%")
         tile("Volatility Max", f"{MAX_VOLATILITY}%")
+        tile("Mode", MODE)
 
     with colB:
         tile("Execution Cost Limit", f"{execution_cost}%")
-        tile("Mode", MODE)
+        tile("Strategy Count", max_strategies)
 
     with colC:
-        tile("Strategy Count", max_strategies)
         tile("Min Action Size", f"${min_action}")
-
+        tile("Capital / Pool", f"{max_capital_per_pool}%")
 # =========================
 # KEYWORD LIBRARY
 # =========================

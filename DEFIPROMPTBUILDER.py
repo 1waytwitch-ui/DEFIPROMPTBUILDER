@@ -683,6 +683,7 @@ with col1:
     tile("Minimum Range", "5%")
     tile("Minimum TVL", f"${MIN_POOL_TVL:,.0f}")
     tile("Default Asset", BASE_CURRENCY)
+    tile("Mode", MODE)
 
 # =========================
 # EXECUTION
@@ -691,6 +692,7 @@ with col2:
     tile("Max Swap Slippage", "3%")
     tile("Max Withdraw Slippage", "3%")
     tile("Max Liquidity Slippage", "3%")
+    tile("Execution Cost Limit", f"{execution_cost}%")
 
 # =========================
 # STRATEGY
@@ -699,6 +701,7 @@ with col3:
     tile("Max Value per Strategy", f"{max_capital_per_pool}%")
     tile("Max Drawdown", "-25%")
     tile("Min Fees", "$2")
+    tile("Min Action Size", f"${min_action}")
 
 # =========================
 # SCAN / MARKET FILTERS
@@ -708,28 +711,11 @@ with col4:
     tile("Min APR 7d", f"{MIN_APR_7D}%")
     tile("Min Volume 24h", f"${MIN_VOLUME_24H:,.0f}")
     tile("Agent Scan Cooldown", f"{scan_minutes} min")
+    tile("Capital / Pool", f"{max_capital_per_pool}%") 
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# =========================
-# ADVANCED SETTINGS (DISPLAY ONLY)
-# =========================
 
-with st.expander("Advanced Settings"):
-
-    colA, colB, colC = st.columns(3)
-
-    with colA:
-        tile("Volatility Max", f"{MAX_VOLATILITY}%")
-        tile("Mode", MODE)
-
-    with colB:
-        tile("Execution Cost Limit", f"{execution_cost}%")
-        tile("Strategy Count", max_strategies)
-
-    with colC:
-        tile("Min Action Size", f"${min_action}")
-        tile("Capital / Pool", f"{max_capital_per_pool}%")
 # =========================
 # KEYWORD LIBRARY
 # =========================

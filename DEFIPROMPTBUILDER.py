@@ -10,6 +10,7 @@ import yfinance as yf
 import math
 import time
 import random
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="DeFi Vault Prompt Builder", layout="wide")
 
@@ -603,24 +604,45 @@ ELSE:
 - Prefer no action over low-confidence action
 """
 
-# =========================
-# PROMPT OUTPUT (SCROLL BOX)
-# =========================
-
 st.subheader(f"Mode: {MODE}")
 
 st.markdown("### PROMPT GENERATED")
 
+# =========================
+# COPY BUTTON
+# =========================
+components.html(f"""
+<button onclick="
+    navigator.clipboard.writeText(`{prompt.replace('`','\\`')}`);
+    this.innerText='✔ Copié';
+    setTimeout(() => this.innerText='📋 Copier le prompt', 1500);
+"
+style="
+    background:#001a0a;
+    color:#00ff66;
+    border:1px solid #00ff66;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:monospace;
+    margin-bottom:10px;
+">
+📋 Copier le prompt
+</button>
+""", height=60)
+
+# =========================
+# PROMPT BOX
+# =========================
 st.text_area(
     label="",
     value=prompt,
-    height=650,          
-    disabled=True        
+    height=650,
+    disabled=True
 )
 
-
 # =========================
-# PARAMETER TILES (SYNC WITH PROMPT)
+# PARAMETER TILES
 # =========================
 
 # --- Dynamic cooldown (agent scan)
